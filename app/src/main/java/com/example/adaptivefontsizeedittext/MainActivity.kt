@@ -25,10 +25,5 @@ class MainActivity : AppCompatActivity() {
                 binding.autoAdaptSizeTextView.text = s
             }
         })
-
-        binding.autoAdaptSizeTextView.setOnLongClickListener {
-            binding.autoAdaptSizeTextView.setTextIsSelectable(true)
-            true
-        }
     }
 }
