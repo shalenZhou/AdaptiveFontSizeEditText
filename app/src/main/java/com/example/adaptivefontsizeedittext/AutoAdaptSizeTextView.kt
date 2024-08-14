@@ -2,9 +2,7 @@ package com.example.adaptivefontsizeedittext
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.util.TypedValue
-import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
 import kotlin.math.ceil
 
@@ -40,6 +38,14 @@ class AutoAdaptSizeTextView : AppCompatTextView {
         super.onLayout(changed, left, top, right, bottom)
         changeTextSize()
         invalidate()
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        paint.textSize = origTextSize
+        val fontMetrics = paint.fontMetrics
+        val singleLineHeight = ceil(fontMetrics.bottom - fontMetrics.top).toInt()
+        setMeasuredDimension(measuredWidth, paddingTop + singleLineHeight + paddingBottom)
     }
 
     private fun changeTextSize() {
