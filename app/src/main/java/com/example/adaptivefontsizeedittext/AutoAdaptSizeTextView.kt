@@ -10,11 +10,6 @@ class AutoAdaptSizeTextView : AppCompatTextView {
     private var minTextSize: Float = 0f
     private var origTextSize: Float = 0f
 
-    /**
-     * 判断输入文本字体是否变小过
-     */
-    private var hasScaleSmall = false
-
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : this(context, attrs, 0)

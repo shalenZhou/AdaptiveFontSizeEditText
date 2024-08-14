@@ -3,8 +3,6 @@ package com.example.adaptivefontsizeedittext
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.View
-import android.view.View.OnLongClickListener
 import androidx.appcompat.app.AppCompatActivity
 import com.example.adaptivefontsizeedittext.databinding.ActivityMainBinding
 
