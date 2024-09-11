@@ -1,137 +1,65 @@
 package com.example.adaptivefontsizeedittext
 
 import android.content.Context
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.AttributeSet
 import android.util.TypedValue
-import android.widget.TextView
 import androidx.appcompat.widget.AppCompatEditText
 
 class AutoAdaptSizeEditText : AppCompatEditText {
-    private var minTextSize: Float = 0f
-    private var maxTextSize: Float = 0f
+    private var origTextSize: Float = 0f
 
-    /**
-     * 判断输入文本字体是否变小过
-     */
-    private var hasScaleSmall = false
+    private val watcher: TextWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
-    /**
-     * 可输出文本的最大长度
-     */
-    private var length = 0
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
-    constructor(context: Context) : super(context)
-
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        // 读取自定义属性，获取设置字体的大小范围
-        val array = context.obtainStyledAttributes(attrs, R.styleable.AutoAdaptSizeEditText)
-        minTextSize = array.getDimension(
-            R.styleable.AutoAdaptSizeEditText_minSize,
-            context.resources.getDimension(R.dimen.edit_text_size_min)
-        )
-        // 使用当前字体大小作为最大值
-        maxTextSize = textSize
-        // 回收 TypedArray
-        array.recycle()
-
-        // 如果设置的最大值 & 最小值不正确（例如：minTextSize > maxTextSize），则互换
-        if (minTextSize > maxTextSize) {
-            val temp = minTextSize
-            minTextSize = maxTextSize
-            maxTextSize = temp
+        override fun afterTextChanged(s: Editable?) {
+            if (isEnabled) {
+                changeTextSize()
+            }
         }
     }
 
-    override fun onTextChanged(
-        text: CharSequence?,
-        start: Int,
-        lengthBefore: Int,
-        lengthAfter: Int
-    ) {
-        autoAdaptTextSize(this)
-        super.onTextChanged(text, start, lengthBefore, lengthAfter)
+    @JvmOverloads
+    constructor(context: Context, attrs: AttributeSet? = null) : super(context, attrs)
+
+    constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(
+        context,
+        attrs,
+        defStyle
+    )
+
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        origTextSize = textSize
+        addTextChangedListener(watcher)
     }
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        if (w != oldw) {
-            autoAdaptTextSize(this)
-        }
-        super.onSizeChanged(w, h, oldw, oldh)
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        removeTextChangedListener(watcher)
     }
 
-    private fun autoAdaptTextSize(textView: TextView) {
-        val text = textView.text.toString()
-        val textWidth = textView.width
-
-        if (text.isEmpty() || textWidth <= 0) {
-            return
-        }
-
-        // 获取输入框可输入的文本长度
-        val maxInputWidth =
-            textView.width - textView.paddingStart - textView.paddingEnd - maxTextSize
-        // 获取当前文本字体大小
-        var currentTextSize = textView.textSize
-
-        // 设置画笔的字体大小
-        paint.textSize = currentTextSize
-
-        /**
-         * 循环减小字体大小
-         * 当    1. 文本字体大小大于最小值 2. 可输入文本长度小于已输入文本长度    时
-         */
-        while ((currentTextSize > minTextSize) && (maxInputWidth < paint.measureText(text))) {
-            hasScaleSmall = true
-
-            --currentTextSize
-
-            if (currentTextSize < minTextSize) {
-                currentTextSize = minTextSize
-                break
-            }
-
-            // 设置画笔的字体大小
-            paint.textSize = currentTextSize
-        }
-
-        /**
-         * 循环增大字体大小
-         * 当    1. 文本字体大小小于最大值 2. 可输入文本长度大于已输入文本长度    时
-         */
-        while (hasScaleSmall && (currentTextSize < maxTextSize) && (maxInputWidth > paint.measureText(
-                text
-            ))
-        ) {
-            ++currentTextSize
-
-            if (currentTextSize > maxTextSize) {
-                currentTextSize = maxTextSize
-                break
-            }
-
-            // 设置画笔的字体大小
-            paint.textSize = currentTextSize
-        }
-
-        /**
-         * 限制输入条件：
-         * 1. 当前字体大小已经是最小字体大小
-         * 2. 所有字体大小的宽度对比控件的最大宽度
-         */
-        if (currentTextSize == minTextSize && paint.measureText(text) > maxInputWidth) {
-            if (text.length > length) {
-                setText(text.substring(0, length))
-                // 光标设置尾部
-                setSelection(length)
-            }
-
-            // 最大可输入字符数，限制输入的关键点
-            setEms(length)
+    private fun changeTextSize() {
+        if (text.isNullOrEmpty()) {
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, origTextSize)
         } else {
-            length = text.length
+            val textWidth = paint.measureText(text.toString())
+            val totalWidth = width - compoundPaddingStart - compoundPaddingEnd
+            if (textWidth > totalWidth) {
+                while (paint.measureText(text.toString()) > totalWidth) {
+                    setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize - 1f)
+                }
+            } else if (textWidth < totalWidth && textSize < origTextSize) {
+                while (paint.measureText(text.toString()) < totalWidth && textSize < origTextSize) {
+                    setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize + 1f)
+                }
+                if (paint.measureText(text.toString()) > totalWidth) {
+                    setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize - 1f)
+                }
+            }
         }
-
-        // 设置文本字体
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, currentTextSize)
     }
 }

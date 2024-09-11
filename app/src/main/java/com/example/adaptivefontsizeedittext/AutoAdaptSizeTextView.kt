@@ -1,46 +1,51 @@
 package com.example.adaptivefontsizeedittext
 
 import android.content.Context
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.AttributeSet
 import android.util.TypedValue
 import androidx.appcompat.widget.AppCompatTextView
-import kotlin.math.ceil
 
-class AutoAdaptSizeTextView : AppCompatTextView {
+class AutoAdaptSizeTextView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyle: Int = 0
+) : AppCompatTextView(context, attrs, defStyle) {
     private var minTextSize: Float = 0f
     private var origTextSize: Float = 0f
 
-    constructor(context: Context) : super(context)
+    private val watcher: TextWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
-    constructor(context: Context, attrs: AttributeSet) : this(context, attrs, 0)
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
-    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(
-        context,
-        attrs,
-        defStyle
-    ) {
+        override fun afterTextChanged(s: Editable?) {
+            if (isEnabled) {
+                changeTextSize()
+            }
+        }
+    }
+
+    init {
         val array =
             context.obtainStyledAttributes(attrs, R.styleable.AutoAdaptSizeTextView)
         minTextSize = array.getDimension(
             R.styleable.AutoAdaptSizeTextView_minTextViewSize,
             context.resources.getDimension(R.dimen.edit_text_size_min)
         )
-        origTextSize = textSize
         array.recycle()
     }
 
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        super.onLayout(changed, left, top, right, bottom)
-        changeTextSize()
-        invalidate()
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        origTextSize = textSize
+        addTextChangedListener(watcher)
     }
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        paint.textSize = origTextSize
-        val fontMetrics = paint.fontMetrics
-        val singleLineHeight = ceil(fontMetrics.bottom - fontMetrics.top).toInt()
-        setMeasuredDimension(measuredWidth, paddingTop + singleLineHeight + paddingBottom)
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        removeTextChangedListener(watcher)
     }
 
     private fun changeTextSize() {
@@ -48,7 +53,7 @@ class AutoAdaptSizeTextView : AppCompatTextView {
             setTextSize(TypedValue.COMPLEX_UNIT_PX, origTextSize)
         } else {
             val textWidth = paint.measureText(text.toString())
-            val totalWidth = width - compoundPaddingStart - compoundPaddingEnd - origTextSize
+            val totalWidth = width - compoundPaddingStart - compoundPaddingEnd
             if (textWidth > totalWidth && textSize > minTextSize) {
                 while (paint.measureText(text.toString()) > totalWidth && textSize > minTextSize) {
                     setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize - 1f)

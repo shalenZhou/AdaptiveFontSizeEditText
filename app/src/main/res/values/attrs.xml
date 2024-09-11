@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- 输入框字体大小自适应自定义属性 -->
-    <declare-styleable name="AutoAdjustSizeEditText">
-        <attr name="minTextSize" format="dimension" />
-    </declare-styleable>
-    <declare-styleable name="AutoAdaptSizeEditText">
-        <attr name="minSize" format="dimension" />
-    </declare-styleable>
-
     <!-- 文本框字体大小自适应自定义属性 -->
     <declare-styleable name="AutoAdaptSizeTextView">
         <attr name="minTextViewSize" format="dimension" />

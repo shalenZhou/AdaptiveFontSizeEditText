@@ -8,17 +8,6 @@
     android:layout_marginHorizontal="30dp"
     tools:context=".MainActivity">
 
-    <com.example.adaptivefontsizeedittext.AutoAdjustSizeEditText
-        android:id="@+id/auto_adjust_size_edit_text"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="AutoAdjustSizeEditText"
-        android:textSize="@dimen/edit_text_size_default"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:minTextSize="@dimen/edit_text_size_min" />
-
     <com.example.adaptivefontsizeedittext.AutoAdaptSizeEditText
         android:id="@+id/auto_adapt_size_edit_text"
         android:layout_width="0dp"
@@ -29,8 +18,7 @@
         android:textSize="@dimen/edit_text_size_default"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/auto_adjust_size_edit_text"
-        app:minSize="@dimen/edit_text_size_min" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.example.adaptivefontsizeedittext.AutoAdaptSizeTextView
         android:id="@+id/auto_adapt_size_text_view"
